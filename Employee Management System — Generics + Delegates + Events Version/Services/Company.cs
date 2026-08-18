@@ -1,4 +1,5 @@
 ﻿using Employee_Management_System___Generics___Delegates___Events_Version.Common;
+using Employee_Management_System___Generics___Delegates___Events_Version.Delegates;
 using Employee_Management_System___Generics___Delegates___Events_Version.Models;
 using System;
 using System.Collections.Generic;
@@ -85,6 +86,24 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
             }
         }
 
+        public Result< List<Employee>> FilterEmployees(EmployeeFilter filter)
+        {
+            List<Employee> result = new();
+
+            if(filter==null)
+            {
+                return Result<List<Employee>>.Failure("Filter Condition not Provided ");
+            }
+
+            foreach (var emp in ActiveEmployees)
+            {
+                if(filter(emp))
+                {
+                    result.Add(emp);
+                }
+            }
+            return Result<List<Employee>>.Failure($"Found {result.Count} Matching Employee ");
+        }
 
     }
 }
