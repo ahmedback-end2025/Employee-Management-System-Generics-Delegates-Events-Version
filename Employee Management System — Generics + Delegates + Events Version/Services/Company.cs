@@ -4,6 +4,7 @@ using Employee_Management_System___Generics___Delegates___Events_Version.Event;
 using Employee_Management_System___Generics___Delegates___Events_Version.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Employee_Management_System___Generics___Delegates___Events_Version.Services
 {
-    internal class Company
+    public class Company
     {
         #region Event
         public event EventHandler<EmployeeEventArgs> EmployeeOnBoarding;
@@ -31,6 +32,31 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
         #endregion
 
         //Functions
+
+
+
+        private bool IsExist(int EmpId)
+        {
+            var SearchResult = SearchById(EmpId);
+            if(SearchResult.IsSuccess)
+            {
+                return true;
+            }
+            else
+            {
+                foreach(var item in OnBoarding)
+                {
+                    if(item.Id==EmpId)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+
+
         public Result<Employee> AddEmployee(Employee emp)
         {
             if (emp == null)
@@ -44,6 +70,10 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
             if (emp.Salary <= 0)
             {
                 return Result<Employee>.Failure("Salary Must be greater than Zero ");
+            }
+            if(IsExist(emp.Id))
+            {
+                  return Result<Employee>.Failure("Employee already Registered ");
             }
 
             OnBoarding.Enqueue(emp);
@@ -62,6 +92,16 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
             {
                 return Result<Department>.Failure("Department Id already registered ");
             }
+
+            if(string.IsNullOrWhiteSpace(dept.Name))
+            {
+                return Result<Department>.Failure("Department Name cannot be empty");
+            }
+
+            if(dept.id<=0)
+            {
+                return Result<Department>.Failure("Department ID must be greater than zero");
+            }
             Departments[dept.id] = dept;
             HistoryAction.Push("Add new Department to Company ");
             return Result<Department>.Success(dept, "Successfully adding Department To Our Company ");
@@ -74,10 +114,19 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
             {
                 return Result<Employee>.Failure($"Process Application Is Already Finished ");
             }
+
+
+
             Employee proc_Emp = OnBoarding.Dequeue();
+
+            if (SearchById(proc_Emp.Id).IsSuccess)
+            {
+                return Result<Employee>.Failure($"Employee with ID {proc_Emp.Id} is already active.");
+            }
+
             ActiveEmployees.Add(proc_Emp);
             HistoryAction.Push($"Apply new Employee {proc_Emp.Name} , ADDED to Active Employees ");
-            EmployeeOnBoarding?.Invoke(this, new EmployeeEventArgs(proc_Emp, $"Employee {proc_Emp.Name} Applied to work in  Department{proc_Emp.DepartmentId} "));
+            EmployeeOnBoarding?.Invoke(this, new EmployeeEventArgs(proc_Emp, $"Employee {proc_Emp.Name} Applied to work in  Department {proc_Emp.DepartmentId} "));
             return Result<Employee>.Success(proc_Emp, "Employee Added To Active Employees  ");
 
         }
@@ -126,6 +175,10 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
         #region Search/Filter [Manual] Function
         public Result<Employee> SearchById(int id)
         {
+            if(id<=0)
+            {
+                return Result<Employee>.Failure("Enter Vaild Id");
+            }
             for (int i = 0; i < ActiveEmployees.Count; i++)
             {
                 if (ActiveEmployees[i].Id == id)
@@ -158,9 +211,9 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
             return Result<Employee>.Failure("Employee Not Found");
         }
         #endregion
-        public Result<Mangaer> PromotionToManger(Employee employee)
+        public Result<Mangaer> PromotionToManger(int employeeId)
         {
-            Result<Employee> verifyEmp = SearchById(employee.Id);
+            Result<Employee> verifyEmp = SearchById(employeeId);
 
             if (!verifyEmp.IsSuccess)
             {
@@ -173,10 +226,9 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
                 return Result<Mangaer>.Failure("Cannot Promote Employee Becuase he isAlready Manager ");
             }
 
-            Mangaer manager = new Mangaer
+            Mangaer manager = new Mangaer(verifyEmp.data.Id)
             {
                 Name = verifyEmp.data.Name,
-                Id = verifyEmp.data.Id,
                 DepartmentId = verifyEmp.data.DepartmentId,
                 Salary = verifyEmp.data.Salary + 10000M,
                 HireDate = verifyEmp.data.HireDate
@@ -187,8 +239,8 @@ namespace Employee_Management_System___Generics___Delegates___Events_Version.Ser
 
 
             HistoryAction.Push($"Promoted {manager.Name} to Manager.");
-            EmployeeOnPromoting?.Invoke(this, new EmployeeEventArgs(manager, $"Employee {employee.Name} has Promoted To Manager of Department {manager.DepartmentId}"));
-            return Result<Mangaer>.Success(manager, $"SuccessFully Promoted Employee {employee.Name} To Manager");
+            EmployeeOnPromoting?.Invoke(this, new EmployeeEventArgs(manager, $"Employee {verifyEmp.data.Name} has Promoted To Manager of Department {manager.DepartmentId}"));
+            return Result<Mangaer>.Success(manager, $"SuccessFully Promoted Employee {verifyEmp.data.Name} To Manager");
 
         }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Employee_Management_System___Generics___Delegates___Events_Version.Common
 {
-    internal class Result<T>
+    public class Result<T>
     {
         public bool IsSuccess { get; }
         public string Message { get; }

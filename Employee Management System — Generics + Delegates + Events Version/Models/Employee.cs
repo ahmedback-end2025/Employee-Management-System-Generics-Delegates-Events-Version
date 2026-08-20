@@ -6,11 +6,21 @@ using System.Threading.Tasks;
 
 namespace Employee_Management_System___Generics___Delegates___Events_Version.Models
 {
-    internal class Employee
+    public class Employee
     {
-        public int Id { get; set; }
+        public static  int next_id =1;
+        public Employee()
+        {
+            Id = next_id++;
+            Salary = 10000M;
+        }
+        public Employee(int existId)
+        {
+            Id = existId;
+        }
+        public int Id { get; }
         public string Name { get; set; }
-        public DateTime HireDate { get; set; }
+        public DateTime HireDate { get; set; } = DateTime.Now;
         public decimal Salary { get; set; }
         public int DepartmentId { get; set; }
 

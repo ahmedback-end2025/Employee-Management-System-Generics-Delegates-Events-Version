@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Employee_Management_System___Generics___Delegates___Events_Version.Models
 {
-    internal class Department
+    public class Department
     {
         public string Name { get; set; }
         public int id { get; set; }

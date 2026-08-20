@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 namespace Employee_Management_System___Generics___Delegates___Events_Version.Delegates
 {
    
-        internal delegate bool EmployeeFilter(Employee employee);
+        public delegate bool EmployeeFilter(Employee employee);
     
 }

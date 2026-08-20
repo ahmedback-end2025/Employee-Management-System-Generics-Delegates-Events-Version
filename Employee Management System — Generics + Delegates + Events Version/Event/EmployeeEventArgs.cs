@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Employee_Management_System___Generics___Delegates___Events_Version.Event
 {
-    internal class EmployeeEventArgs:EventArgs
+    public class EmployeeEventArgs:EventArgs
     {
         public Employee employee { get; }
 
